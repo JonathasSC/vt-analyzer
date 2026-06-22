@@ -13,7 +13,7 @@
 
 <header>
   <div class="hdr-l">
-    <div class="hdr-logo">🛡️</div>
+    <img class="hdr-logo" src="logo_ufpe.png" alt="UFPE">
     <div class="hdr-title">
       <h1>VirusTotal Dashboard</h1>
       <p>Análise de detecção de malware</p>
@@ -22,21 +22,10 @@
   </div>
   <div class="hdr-r">
     <button class="btn btn-g" onclick="resetToDefault()">↺ Restaurar padrão</button>
-    <label class="btn btn-p" style="cursor:pointer">
-      ＋ Importar JSON
-      <input type="file" accept=".json" multiple style="display:none" id="fi" onchange="handleFile(event)">
-    </label>
   </div>
 </header>
 
 <main>
-  <div id="dz" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)" onclick="document.getElementById('fi').click()">
-    <span class="icon">📂</span>
-    <p><strong>Arraste arquivos JSON</strong> do VirusTotal aqui</p>
-    <p>ou clique para selecionar — suporta múltiplos arquivos</p>
-    <p class="dz-hint">Formato suportado: .json</p>
-  </div>
-
   <section>
     <div class="shdr"><h2>Visão Geral</h2></div>
     <div class="ov-grid" id="ov"></div>

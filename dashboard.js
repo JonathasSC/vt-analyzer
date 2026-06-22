@@ -16,18 +16,6 @@ function init() {
 function save() { localStorage.setItem(SK, JSON.stringify(scans)); }
 
 /* ── AÇÕES ── */
-function addScan(data) {
-  if (!data || !data.summary || !Array.isArray(data.detections)) {
-    toast('Formato inválido — JSON não reconhecido.', 'err'); return false;
-  }
-  if (scans.find(s => s.summary.hash === data.summary.hash)) {
-    toast('Hash já presente: ' + data.summary.hash.slice(0,8) + '…', 'warn'); return false;
-  }
-  scans.push(data); save(); render();
-  toast('Scan adicionado: ' + data.summary.hash.slice(0,8) + '…', 'ok');
-  return true;
-}
-
 function removeScan(hash) {
   if (!confirm('Remover este scan?')) return;
   scans = scans.filter(s => s.summary.hash !== hash);
@@ -37,20 +25,6 @@ function removeScan(hash) {
 function resetToDefault() {
   if (!confirm('Restaurar dados originais? Scans importados serão perdidos.')) return;
   scans = cloneData(INITIAL_DATA); save(); render(); toast('Dados restaurados.', 'ok');
-}
-
-/* ── IMPORT ── */
-function handleFile(e) { [...e.target.files].forEach(rf); e.target.value = ''; }
-function dzOver(e) { e.preventDefault(); document.getElementById('dz').classList.add('drag'); }
-function dzLeave() { document.getElementById('dz').classList.remove('drag'); }
-function dzDrop(e) {
-  e.preventDefault(); document.getElementById('dz').classList.remove('drag');
-  [...e.dataTransfer.files].filter(f => f.name.endsWith('.json')).forEach(rf);
-}
-function rf(file) {
-  const r = new FileReader();
-  r.onload = e => { try { addScan(JSON.parse(e.target.result)); } catch { toast('Erro ao ler ' + file.name, 'err'); } };
-  r.readAsText(file);
 }
 
 /* ── FILTRO / ORDENAÇÃO ── */
@@ -102,7 +76,6 @@ function detNames() {
 /* ── RENDER PRINCIPAL ── */
 function render() {
   document.getElementById('badge').textContent = scans.length + ' scan' + (scans.length!==1?'s':'');
-  document.getElementById('dz').style.display = scans.length===0 ? 'block' : 'none';
   renderOverview(); renderScans(); renderRankings(); renderLeastDetected(); renderNames();
 }
 
