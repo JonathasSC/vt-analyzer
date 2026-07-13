@@ -35,14 +35,47 @@ function onVtApiKeyInput(val) {
   updateVtKeyHint();
 }
 
-function onVtFilesSelected(input) {
-  vtSelectedFiles = Array.from(input.files || []);
+function toggleVtKeyVisibility(btn) {
+  const input = document.getElementById('vt-apikey');
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.querySelector('.material-symbols-outlined').textContent = showing ? 'visibility' : 'visibility_off';
+  btn.setAttribute('aria-label', showing ? 'Mostrar chave' : 'Ocultar chave');
+}
+
+function setVtSelectedFiles(fileList) {
+  vtSelectedFiles = Array.from(fileList || []);
   vtIndividualPasswords = vtSelectedFiles.map(() => '');
   renderVtFileList();
 }
 
-function setVtPassMode(mode) {
+function onVtFilesSelected(input) {
+  setVtSelectedFiles(input.files);
+}
+
+function initVtDropzone() {
+  const dz = document.getElementById('vt-dropzone');
+  if (!dz) return;
+  ['dragenter', 'dragover'].forEach(evt => dz.addEventListener(evt, e => {
+    e.preventDefault();
+    dz.classList.add('dragover');
+  }));
+  ['dragleave', 'drop'].forEach(evt => dz.addEventListener(evt, e => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+  }));
+  dz.addEventListener('drop', e => setVtSelectedFiles(e.dataTransfer.files));
+  dz.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      document.getElementById('vt-files').click();
+    }
+  });
+}
+
+function setVtPassMode(mode, btnEl) {
   vtPassMode = mode;
+  document.querySelectorAll('.up-pass-opt').forEach(b => b.classList.toggle('active', b === btnEl));
   const shared = document.getElementById('vt-pass-shared-input');
   shared.style.display = mode === 'shared' ? '' : 'none';
   renderVtFileList();
@@ -52,6 +85,12 @@ function setVtIndividualPassword(i, val) {
   vtIndividualPasswords[i] = val;
 }
 
+function removeVtFile(i) {
+  vtSelectedFiles.splice(i, 1);
+  vtIndividualPasswords.splice(i, 1);
+  renderVtFileList();
+}
+
 function renderVtFileList() {
   const el = document.getElementById('vt-file-list');
   if (!vtSelectedFiles.length) { el.innerHTML = ''; return; }
@@ -59,8 +98,13 @@ function renderVtFileList() {
     const sizeTxt = (f.size / 1024 / 1024).toFixed(2) + ' MB';
     const passField = vtPassMode === 'individual'
       ? '<input type="password" class="up-input up-pass-ind" placeholder="Senha (opcional)" value="' + esc(vtIndividualPasswords[i] || '') + '" oninput="setVtIndividualPassword(' + i + ',this.value)">'
-      : '<span></span>';
-    return '<div class="up-file-row"><span class="up-file-name" title="' + esc(f.name) + '">' + esc(f.name) + '</span><span class="up-file-size">' + sizeTxt + '</span>' + passField + '</div>';
+      : '';
+    return '<div class="up-file-row">' +
+      mi('description', 'up-file-icon') +
+      '<div class="up-file-meta"><span class="up-file-name" title="' + esc(f.name) + '">' + esc(f.name) + '</span><span class="up-file-size">' + sizeTxt + '</span></div>' +
+      passField +
+      '<button type="button" class="up-file-remove" onclick="removeVtFile(' + i + ')" title="Remover arquivo">' + mi('close') + '</button>' +
+    '</div>';
   }).join('');
 }
 
@@ -72,6 +116,7 @@ async function submitVtUploads() {
 
   const btn = document.getElementById('vt-submit-btn');
   btn.disabled = true;
+  btn.classList.add('loading');
 
   vtJobs = vtSelectedFiles.map((f, i) => ({
     file: f,
@@ -87,6 +132,7 @@ async function submitVtUploads() {
   }
 
   btn.disabled = false;
+  btn.classList.remove('loading');
   toast('Processamento concluído.', 'ok');
 }
 
@@ -171,13 +217,25 @@ function vtResultToScan(vtJson, fileName) {
   };
 }
 
+function vtJobIcon(status) {
+  if (status === 'concluído') return 'check_circle';
+  if (status === 'erro') return 'error';
+  if (status.startsWith('enviando')) return 'upload';
+  if (status.startsWith('analisando')) return 'search';
+  return 'hourglass_empty';
+}
+
 function renderVtJobs() {
   const el = document.getElementById('vt-jobs');
   if (!vtJobs.length) { el.innerHTML = ''; return; }
   el.innerHTML = vtJobs.map(j => {
     const cls = j.status === 'concluído' ? 'up-ok' : j.status === 'erro' ? 'up-err' : 'up-pending';
-    return '<div class="up-job ' + cls + '"><span class="up-job-name" title="' + esc(j.file.name) + '">' + esc(j.file.name) + '</span><span class="up-job-status">' + esc(j.error || j.status) + '</span></div>';
+    return '<div class="up-job ' + cls + '">' +
+      mi(vtJobIcon(j.status), 'up-job-icon') +
+      '<span class="up-job-name" title="' + esc(j.file.name) + '">' + esc(j.file.name) + '</span>' +
+      '<span class="up-job-status">' + esc(j.error || j.status) + '</span>' +
+    '</div>';
   }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', initVtUpload);
+document.addEventListener('DOMContentLoaded', () => { initVtUpload(); initVtDropzone(); });

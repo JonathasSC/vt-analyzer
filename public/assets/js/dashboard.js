@@ -94,16 +94,16 @@ function renderOverview() {
   const cons  = es.filter(e=>e.part>0&&e.rate===100).length;
 
   g.innerHTML =
-    oc('c-acc','Scans Carregados',scans.length,tAll+' análises totais') +
-    oc('c-mal','Total Detecções',tMal,'média '+avg+'% por scan') +
-    oc('c-und','Não Detectado',tUnd,(tUnd/tAll*100).toFixed(1)+'% do total') +
-    oc('c-uns','Sem Suporte / Falha',tUns,(tFail?'+ '+tFail+' falha(s)':'0 falhas')) +
-    oc('c-acc','Engines 100% Precisas',cons,'detectaram em todos os scans') +
-    (top ? '<div class="ov-card c-top"><div class="lbl">Melhor Detector</div><div class="val">'+esc(top.name)+'</div><div class="sub-txt">'+top.mal+'/'+scans.length+' scans detectados</div></div>' : '');
+    oc('c-acc','inventory_2','Scans Carregados',scans.length,tAll+' análises totais') +
+    oc('c-mal','report','Total Detecções',tMal,'média '+avg+'% por scan') +
+    oc('c-und','check_circle','Não Detectado',tUnd,(tUnd/tAll*100).toFixed(1)+'% do total') +
+    oc('c-uns','error','Sem Suporte / Falha',tUns,(tFail?'+ '+tFail+' falha(s)':'0 falhas')) +
+    oc('c-acc','verified','Engines 100% Precisas',cons,'detectaram em todos os scans') +
+    (top ? '<div class="ov-card c-top"><div class="ov-icon">'+mi('military_tech')+'</div><div class="lbl">Melhor Detector</div><div class="val">'+esc(top.name)+'</div><div class="sub-txt">'+top.mal+'/'+scans.length+' scans detectados</div></div>' : '');
 }
 
-function oc(cls,lbl,val,sub) {
-  return '<div class="ov-card '+cls+'"><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div><div class="sub-txt">'+sub+'</div></div>';
+function oc(cls,icon,lbl,val,sub) {
+  return '<div class="ov-card '+cls+'"><div class="ov-icon">'+mi(icon)+'</div><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div><div class="sub-txt">'+sub+'</div></div>';
 }
 
 /* ── SCAN CARDS ── */
@@ -111,8 +111,8 @@ function renderScans() {
   const g = document.getElementById('scg');
   const display = getDisplayScans();
   document.getElementById('sc-cnt').textContent = scans.length;
-  if (!scans.length) { g.innerHTML='<div class="empty">Nenhum scan ainda. Envie arquivos para análise acima.</div>'; return; }
-  if (!display.length) { g.innerHTML='<div class="empty">Nenhum resultado para o filtro aplicado.</div>'; return; }
+  if (!scans.length) { g.innerHTML=emptyState('Nenhum scan ainda. Envie arquivos para análise acima.'); return; }
+  if (!display.length) { g.innerHTML=emptyState('Nenhum resultado para o filtro aplicado.'); return; }
 
   g.innerHTML = display.map((scan,i) => {
     const s = scan.summary, T = s.total;
@@ -128,10 +128,11 @@ function renderScans() {
     }).join('');
     const failTag = s.failure ? '<div class="sc-stat"><div class="dot df"></div><strong>'+s.failure+'</strong>&nbsp;falha</div>' : '';
     const idx = scans.indexOf(scan);
+    const sevBadge = sev==='high' ? '<span class="sc-badge sc-badge-high">Alta</span>' : sev==='med' ? '<span class="sc-badge sc-badge-med">Média</span>' : '<span class="sc-badge sc-badge-low">Baixa</span>';
     return '<div class="sc-card" data-sev="'+sev+'">'+
       '<div class="sc-head">'+
         '<div>'+(s.fileName?'<div class="sc-file" title="'+esc(s.fileName)+'">'+esc(s.fileName)+'</div>':'')+'<div class="sc-hash">'+s.hash.slice(0,16)+'…</div><div class="sc-hash-full">'+s.hash+'</div></div>'+
-        '<button class="sc-rm" onclick="removeScan(\''+s.hash+'\')" title="Remover scan">×</button>'+
+        '<div class="sc-head-actions">'+sevBadge+'<button class="sc-rm" onclick="removeScan(\''+s.hash+'\')" title="Remover scan">'+mi('close')+'</button></div>'+
       '</div>'+
       '<div class="sc-nums">'+
         '<div><div class="sc-dc">'+s.malicious+'/'+T+'</div><div class="sc-dl">detectados</div></div>'+
@@ -149,7 +150,7 @@ function renderScans() {
         '<div class="sc-stat"><div class="dot ds"></div><strong>'+s.unsupported+'</strong>&nbsp;s/suporte</div>'+
         failTag+
       '</div>'+
-      '<button class="xbtn" data-n="'+scan.detections.length+'" onclick="toggleDets(this,\'d'+idx+'\')">▼ Ver todas as detecções ('+scan.detections.length+')</button>'+
+      '<button class="xbtn" data-n="'+scan.detections.length+'" onclick="toggleDets(this,\'d'+idx+'\')">'+mi('expand_more','xbtn-chev')+'<span class="xbtn-label">Ver todas as detecções ('+scan.detections.length+')</span></button>'+
       '<div class="sc-dets" id="d'+idx+'">'+rows+'</div>'+
     '</div>';
   }).join('');
@@ -157,13 +158,14 @@ function renderScans() {
 
 function toggleDets(btn, id) {
   const open = document.getElementById(id).classList.toggle('open');
-  btn.textContent = open ? '▲ Ocultar detecções' : '▼ Ver todas as detecções ('+btn.dataset.n+')';
+  btn.classList.toggle('open', open);
+  btn.querySelector('.xbtn-label').textContent = open ? 'Ocultar detecções' : 'Ver todas as detecções ('+btn.dataset.n+')';
 }
 
 /* ── RANKINGS ── */
 function renderRankings() {
   const ids = ['tp-det','tp-miss','tp-inc','tp-nev','tp-all'];
-  if (!scans.length) { ids.forEach(id=>document.getElementById(id).innerHTML='<div class="empty">Sem dados.</div>'); return; }
+  if (!scans.length) { ids.forEach(id=>document.getElementById(id).innerHTML=emptyState('Sem dados.')); return; }
 
   const es = engineStats(), n = scans.length;
   const sorted = (arr,fn) => [...arr].sort(fn);
@@ -176,14 +178,20 @@ function renderRankings() {
 
   document.getElementById('tp-det').innerHTML  = tbl(topDet, n);
   document.getElementById('tp-miss').innerHTML = tbl(topMiss, n);
-  document.getElementById('tp-inc').innerHTML  = inc.length ? tbl(inc, n) : '<div class="empty">Nenhuma engine inconsistente entre os scans.</div>';
-  document.getElementById('tp-nev').innerHTML  = never.length ? tbl(never, n) : '<div class="empty">Todas as engines detectaram ao menos um scan.</div>';
+  document.getElementById('tp-inc').innerHTML  = inc.length ? tbl(inc, n) : emptyState('Nenhuma engine inconsistente entre os scans.');
+  document.getElementById('tp-nev').innerHTML  = never.length ? tbl(never, n) : emptyState('Todas as engines detectaram ao menos um scan.');
   document.getElementById('tp-all').innerHTML  = tbl(all, n);
 }
 
 function tbl(rows, n) {
-  if (!rows.length) return '<div class="empty">Sem dados.</div>';
-  const head = '<thead><tr><th>#</th><th style="text-align:left">Engine</th><th>🔴 Malicioso</th><th>🟢 Limpo</th><th>⚫ S/Suporte</th><th>🟡 Falha</th><th>⏱ Timeout</th><th>Taxa Detecção</th></tr></thead>';
+  if (!rows.length) return emptyState('Sem dados.');
+  const head = '<thead><tr><th>#</th><th style="text-align:left">Engine</th>'+
+    '<th>'+mi('dangerous','th-icon')+'Malicioso</th>'+
+    '<th>'+mi('check_circle','th-icon')+'Limpo</th>'+
+    '<th>'+mi('block','th-icon')+'S/Suporte</th>'+
+    '<th>'+mi('error','th-icon')+'Falha</th>'+
+    '<th>'+mi('hourglass_empty','th-icon')+'Timeout</th>'+
+    '<th>Taxa Detecção</th></tr></thead>';
   const body = rows.map((e,i) => {
     const rCls = i===0?'rk rk1':i===1?'rk rk2':i===2?'rk rk3':'rk';
     const rPct = e.rate.toFixed(0);
@@ -215,7 +223,7 @@ function tbl(rows, n) {
 function renderLeastDetected() {
   const el = document.getElementById('lm-table');
   const cnt = document.getElementById('lm-cnt');
-  if (!scans.length) { el.innerHTML = '<div class="empty">Sem dados.</div>'; return; }
+  if (!scans.length) { el.innerHTML = emptyState('Sem dados.'); return; }
   cnt.textContent = scans.length;
 
   const sorted = [...scans].sort((a, b) => {
@@ -268,7 +276,7 @@ function renderLeastDetected() {
 function renderNames() {
   const names = detNames();
   document.getElementById('nc').textContent = names.length;
-  if (!names.length) { document.getElementById('nl').innerHTML='<div class="empty">Sem dados.</div>'; return; }
+  if (!names.length) { document.getElementById('nl').innerHTML=emptyState('Sem dados.'); return; }
   const max = names[0][1];
   const rows = names.slice(0,30).map(([name,cnt],i) => {
     const rCls = i===0?'nrk nrk1':i===1?'nrk nrk2':i===2?'nrk nrk3':'nrk';
@@ -295,10 +303,18 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+function mi(name, cls) {
+  return '<span class="material-symbols-outlined'+(cls?' '+cls:'')+'">'+name+'</span>';
+}
+
+function emptyState(msg) {
+  return '<div class="empty">'+mi('inbox','empty-icon')+esc(msg)+'</div>';
+}
+
 function toast(msg, type) {
   const el = document.getElementById('toast');
-  const icons = { ok:'✓', err:'✕', warn:'⚠' };
-  el.innerHTML = '<span class="t-icon">'+(icons[type]||'●')+'</span><span>'+esc(msg)+'</span>';
+  const icons = { ok:'check_circle', err:'error', warn:'warning' };
+  el.innerHTML = mi(icons[type]||'info','t-icon')+'<span>'+esc(msg)+'</span>';
   el.className = 'show '+(type||'');
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>el.className='', 3200);

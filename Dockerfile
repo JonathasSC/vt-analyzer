@@ -5,7 +5,8 @@ WORKDIR /app
 COPY --chown=node:node package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY --chown=node:node server.js dashboard.js dashboard.css vt-client.js index.html logo_ufpe.png ./
+COPY --chown=node:node server.js ./
+COPY --chown=node:node public ./public
 
 ENV PORT=3000
 EXPOSE 3000

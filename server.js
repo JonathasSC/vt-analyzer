@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const multer = require('multer');
 
@@ -17,7 +18,7 @@ function forwardVtError(res, vtResp, vtJson) {
   return res.status(vtResp.status).json(vtJson);
 }
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 app.get('/api/config', (req, res) => {

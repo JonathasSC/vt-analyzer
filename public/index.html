@@ -7,13 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="dashboard.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 <body>
 
 <header>
   <div class="hdr-l">
-    <img class="hdr-logo" src="logo_ufpe.png" alt="UFPE">
+    <img class="hdr-logo" src="assets/img/logo.png" alt="UFPE">
     <div class="hdr-title">
       <h1>VirusTotal Dashboard</h1>
       <p>Análise de detecção de malware</p>
@@ -21,53 +22,77 @@
     <span class="badge" id="badge">0 scans</span>
   </div>
   <div class="hdr-r">
-    <button class="btn btn-g" onclick="clearAllScans()">🗑 Limpar tudo</button>
+    <button class="btn btn-g" onclick="clearAllScans()"><span class="material-symbols-outlined">delete</span> Limpar tudo</button>
   </div>
 </header>
 
 <main>
   <section>
-    <div class="shdr"><h2>Enviar Arquivos para Análise</h2></div>
+    <div class="shdr">
+      <div class="shdr-main">
+        <h2><span class="material-symbols-outlined shdr-icon">upload_file</span>Enviar Arquivos para Análise</h2>
+        <p class="shdr-sub">Envio real para a VirusTotal — os resultados entram automaticamente no dashboard abaixo.</p>
+      </div>
+    </div>
     <div class="up-panel">
-      <div class="up-row">
-        <div class="up-field">
-          <label class="up-label" for="vt-apikey">Chave de API (VirusTotal)</label>
-          <input type="password" id="vt-apikey" class="up-input" placeholder="Cole sua API key…" autocomplete="off" oninput="onVtApiKeyInput(this.value)">
+      <div class="up-steps">
+        <div class="up-step">
+          <div class="up-step-head">
+            <span class="up-step-n">1</span>
+            <label class="up-label" for="vt-apikey">Chave de API da VirusTotal</label>
+          </div>
+          <div class="up-key-wrap">
+            <span class="material-symbols-outlined up-key-icon">key</span>
+            <input type="password" id="vt-apikey" class="up-input up-key-input" placeholder="Cole sua API key…" autocomplete="off" oninput="onVtApiKeyInput(this.value)">
+            <button type="button" class="up-key-toggle" id="vt-apikey-toggle" onclick="toggleVtKeyVisibility(this)" aria-label="Mostrar chave"><span class="material-symbols-outlined">visibility</span></button>
+          </div>
           <div class="up-hint" id="vt-apikey-hint"></div>
         </div>
-      </div>
-      <div class="up-row">
-        <div class="up-field">
-          <label class="up-label" for="vt-files">Arquivos (um ou mais)</label>
-          <input type="file" id="vt-files" multiple onchange="onVtFilesSelected(this)">
+
+        <div class="up-step">
+          <div class="up-step-head">
+            <span class="up-step-n">2</span>
+            <label class="up-label">Arquivos</label>
+          </div>
+          <label class="up-dropzone" id="vt-dropzone" for="vt-files" tabindex="0" role="button" aria-label="Selecionar arquivos para análise">
+            <input type="file" id="vt-files" multiple onchange="onVtFilesSelected(this)" hidden>
+            <span class="material-symbols-outlined up-dz-icon">cloud_upload</span>
+            <span class="up-dz-text"><strong>Clique para escolher</strong> ou arraste os arquivos aqui</span>
+            <span class="up-dz-sub">Múltiplos arquivos · até 650MB cada</span>
+          </label>
+          <div id="vt-file-list" class="up-file-list"></div>
         </div>
-      </div>
-      <div class="up-row">
-        <div class="up-field">
-          <label class="up-label">Senha de arquivos protegidos (ZIP)</label>
-          <div class="up-pass-mode">
-            <label><input type="radio" name="vt-pass-mode" value="shared" checked onchange="setVtPassMode('shared')"> Mesma senha para todos</label>
-            <label><input type="radio" name="vt-pass-mode" value="individual" onchange="setVtPassMode('individual')"> Senha individual por arquivo</label>
+
+        <div class="up-step">
+          <div class="up-step-head">
+            <span class="up-step-n">3</span>
+            <label class="up-label">Senha de arquivos protegidos (ZIP)</label>
+          </div>
+          <div class="up-pass-toggle" role="radiogroup" aria-label="Modo de senha">
+            <button type="button" class="up-pass-opt active" data-mode="shared" onclick="setVtPassMode('shared', this)">Mesma senha para todos</button>
+            <button type="button" class="up-pass-opt" data-mode="individual" onclick="setVtPassMode('individual', this)">Senha individual por arquivo</button>
           </div>
           <input type="password" id="vt-pass-shared-input" class="up-input" placeholder="Senha (opcional)" autocomplete="off">
         </div>
       </div>
-      <div id="vt-file-list" class="up-file-list"></div>
-      <button class="btn btn-acc" id="vt-submit-btn" onclick="submitVtUploads()">⬆ Enviar e Analisar</button>
+
+      <button class="btn btn-acc btn-lg" id="vt-submit-btn" onclick="submitVtUploads()">
+        <span class="material-symbols-outlined btn-icon">upload</span> Enviar e Analisar
+      </button>
       <div id="vt-jobs" class="up-jobs"></div>
     </div>
   </section>
 
   <section>
-    <div class="shdr"><h2>Visão Geral</h2></div>
+    <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">monitoring</span>Visão Geral</h2></div>
     <div class="ov-grid" id="ov"></div>
   </section>
 
   <section>
-    <div class="shdr"><h2>Amostras Analisadas</h2><span class="cnt" id="sc-cnt">0</span></div>
+    <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">science</span>Amostras Analisadas</h2><span class="cnt" id="sc-cnt">0</span></div>
     <div class="sc-toolbar">
       <div class="sc-search">
-        <span class="sc-search-icon">⌕</span>
+        <span class="material-symbols-outlined sc-search-icon">search</span>
         <input type="text" id="sc-filter" placeholder="Filtrar por hash…" oninput="filterScans(this.value)">
       </div>
       <select class="sc-sort" id="sc-sort" onchange="changeSortMode(this.value)">
@@ -80,14 +105,14 @@
   </section>
 
   <section>
-    <div class="shdr"><h2>Ranking de Engines</h2></div>
+    <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">leaderboard</span>Ranking de Engines</h2></div>
     <div class="tw">
       <div class="tabs">
-        <button class="tab active" onclick="switchTab(this,'tp-det')">🔴 Top Detectores</button>
-        <button class="tab" onclick="switchTab(this,'tp-miss')">🟢 Mais Falhas</button>
-        <button class="tab" onclick="switchTab(this,'tp-inc')">🟡 Inconsistentes</button>
-        <button class="tab" onclick="switchTab(this,'tp-nev')">⚫ Nunca Detectou</button>
-        <button class="tab" onclick="switchTab(this,'tp-all')">📋 Todas</button>
+        <button class="tab active" onclick="switchTab(this,'tp-det')"><span class="material-symbols-outlined tab-icon">gpp_bad</span>Top Detectores</button>
+        <button class="tab" onclick="switchTab(this,'tp-miss')"><span class="material-symbols-outlined tab-icon">check_circle</span>Mais Falhas</button>
+        <button class="tab" onclick="switchTab(this,'tp-inc')"><span class="material-symbols-outlined tab-icon">help</span>Inconsistentes</button>
+        <button class="tab" onclick="switchTab(this,'tp-nev')"><span class="material-symbols-outlined tab-icon">visibility_off</span>Nunca Detectou</button>
+        <button class="tab" onclick="switchTab(this,'tp-all')"><span class="material-symbols-outlined tab-icon">list_alt</span>Todas</button>
       </div>
       <div id="tp-det" class="tp active"></div>
       <div id="tp-miss" class="tp"></div>
@@ -98,14 +123,14 @@
   </section>
 
   <section>
-    <div class="shdr"><h2>Malware Menos Identificado</h2><span class="cnt" id="lm-cnt">0</span></div>
+    <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">search_off</span>Malware Menos Identificado</h2><span class="cnt" id="lm-cnt">0</span></div>
     <div class="tw">
       <div id="lm-table"></div>
     </div>
   </section>
 
   <section>
-    <div class="shdr"><h2>Nomes de Detecção Mais Comuns</h2><span class="cnt" id="nc">0</span></div>
+    <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">label</span>Nomes de Detecção Mais Comuns</h2><span class="cnt" id="nc">0</span></div>
     <div id="nl"></div>
   </section>
 </main>
@@ -116,7 +141,7 @@
 const INITIAL_DATA = [];
 
 </script>
-<script src="dashboard.js"></script>
-<script src="vt-client.js"></script>
+<script src="assets/js/dashboard.js"></script>
+<script src="assets/js/vt-client.js"></script>
 </body>
 </html>
