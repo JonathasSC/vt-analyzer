@@ -22,9 +22,9 @@ function removeScan(hash) {
   save(); render(); toast('Scan removido.', 'warn');
 }
 
-function resetToDefault() {
-  if (!confirm('Restaurar dados originais? Scans importados serão perdidos.')) return;
-  scans = cloneData(INITIAL_DATA); save(); render(); toast('Dados restaurados.', 'ok');
+function clearAllScans() {
+  if (!confirm('Remover todos os scans?')) return;
+  scans = []; save(); render(); toast('Todos os scans foram removidos.', 'warn');
 }
 
 /* ── FILTRO / ORDENAÇÃO ── */
@@ -111,7 +111,7 @@ function renderScans() {
   const g = document.getElementById('scg');
   const display = getDisplayScans();
   document.getElementById('sc-cnt').textContent = scans.length;
-  if (!scans.length) { g.innerHTML='<div class="empty">Nenhum scan. Importe arquivos JSON.</div>'; return; }
+  if (!scans.length) { g.innerHTML='<div class="empty">Nenhum scan ainda. Envie arquivos para análise acima.</div>'; return; }
   if (!display.length) { g.innerHTML='<div class="empty">Nenhum resultado para o filtro aplicado.</div>'; return; }
 
   g.innerHTML = display.map((scan,i) => {
@@ -130,7 +130,7 @@ function renderScans() {
     const idx = scans.indexOf(scan);
     return '<div class="sc-card" data-sev="'+sev+'">'+
       '<div class="sc-head">'+
-        '<div><div class="sc-hash">'+s.hash.slice(0,16)+'…</div><div class="sc-hash-full">'+s.hash+'</div></div>'+
+        '<div>'+(s.fileName?'<div class="sc-file" title="'+esc(s.fileName)+'">'+esc(s.fileName)+'</div>':'')+'<div class="sc-hash">'+s.hash.slice(0,16)+'…</div><div class="sc-hash-full">'+s.hash+'</div></div>'+
         '<button class="sc-rm" onclick="removeScan(\''+s.hash+'\')" title="Remover scan">×</button>'+
       '</div>'+
       '<div class="sc-nums">'+

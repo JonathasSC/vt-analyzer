@@ -1,0 +1,10 @@
+services:
+  mirai-dashboard:
+    build: .
+    image: mirai-dashboard:latest
+    container_name: mirai-dashboard
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    env_file:
+      - .env
+    restart: unless-stopped

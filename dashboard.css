@@ -182,6 +182,45 @@ main {
 .c-top::after { background: var(--mal) !important; }
 .c-top:hover { box-shadow: 0 8px 32px rgba(240,82,82,.12) !important; }
 
+/* ── UPLOAD PANEL (VirusTotal) ── */
+.up-panel { background: var(--sur); border: 1px solid var(--bdr); border-radius: var(--r); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.up-row { display: flex; flex-wrap: wrap; gap: 16px; }
+.up-field { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+.up-label { font-size: 11px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: .04em; }
+.up-input, input[type="file"]#vt-files {
+  background: var(--sur); border: 1px solid var(--bdr); border-radius: var(--r-sm);
+  color: var(--txt); font-size: 13px; padding: 9px 12px; outline: none; transition: var(--trans);
+  font-family: 'JetBrains Mono','Courier New',monospace;
+}
+.up-input:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(153,0,0,.12); }
+.up-hint { font-size: 11px; color: var(--mut); }
+.up-pass-mode { display: flex; gap: 18px; font-size: 12px; color: var(--sub); margin-bottom: 4px; flex-wrap: wrap; }
+.up-pass-mode label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+.up-file-list { display: flex; flex-direction: column; gap: 8px; }
+.up-file-row {
+  display: grid; grid-template-columns: 1fr auto 200px; gap: 10px; align-items: center;
+  padding: 8px 12px; background: var(--sur2); border: 1px solid var(--bdr); border-radius: var(--r-sm);
+  font-size: 12px;
+}
+.up-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.up-file-size { color: var(--mut); font-size: 11px; white-space: nowrap; }
+.up-pass-ind { padding: 6px 10px; font-size: 11px; }
+
+.btn-acc { background: var(--acc); color: #fff; border-color: var(--acc); align-self: flex-start; }
+.btn-acc:hover { background: #7a0000; }
+.btn-acc:disabled { opacity: .55; cursor: not-allowed; }
+
+.up-jobs { display: flex; flex-direction: column; gap: 6px; }
+.up-job { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: var(--r-sm); background: var(--sur2); border: 1px solid var(--bdr); font-size: 12px; }
+.up-job-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.up-job-status { color: var(--mut); white-space: nowrap; }
+.up-job.up-ok .up-job-status { color: var(--und); font-weight: 600; }
+.up-job.up-err .up-job-status { color: var(--mal); font-weight: 600; }
+.up-job.up-pending .up-job-status { color: var(--fail); }
+
+.sc-file { font-size: 11px; color: var(--sub); font-weight: 600; margin-top: 2px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+
 /* ── SEARCH / FILTER TOOLBAR ── */
 .sc-toolbar {
   display: flex; gap: 10px; align-items: center;
