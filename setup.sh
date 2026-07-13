@@ -7,6 +7,11 @@ cd "$SCRIPT_DIR"
 
 trap 'echo; echo "Falha na linha $LINENO do script. Veja a mensagem de erro acima para mais detalhes." >&2' ERR
 
+if [ ! -f docker-compose.yml ]; then
+  echo "docker-compose.yml não encontrado em $SCRIPT_DIR" >&2
+  exit 1
+fi
+
 DOCKER_CMD="docker"
 
 install_docker_linux() {
@@ -68,18 +73,26 @@ DEFAULT_PORT="$(grep -m1 '^HOST_PORT=' .env 2>/dev/null | cut -d= -f2 | tr -d '[
 DEFAULT_PORT="${DEFAULT_PORT:-3000}"
 
 FREE_PORT="$DEFAULT_PORT"
-tries=0
-while port_in_use "$FREE_PORT" && [ "$tries" -lt 50 ]; do
-  FREE_PORT=$((FREE_PORT + 1))
-  tries=$((tries + 1))
-done
 
-if [ "$FREE_PORT" != "$DEFAULT_PORT" ]; then
-  echo "Porta $DEFAULT_PORT já está em uso; usando a porta $FREE_PORT."
-  if grep -q '^HOST_PORT=' .env; then
-    sed -i "s/^HOST_PORT=.*/HOST_PORT=$FREE_PORT/" .env
-  else
-    echo "HOST_PORT=$FREE_PORT" >> .env
+# Se o container mirai-dashboard já existe (rodando ou só parado), o "docker compose up"
+# abaixo vai recriá-lo/reiniciá-lo liberando e reocupando a mesma porta — não é conflito real,
+# então pulamos a varredura de porta livre para não incrementar à toa a cada execução.
+EXISTING_CONTAINER="$($DOCKER_CMD ps -a --filter 'name=^/mirai-dashboard$' --format '{{.Names}}' 2>/dev/null)"
+
+if [ -z "$EXISTING_CONTAINER" ]; then
+  tries=0
+  while port_in_use "$FREE_PORT" && [ "$tries" -lt 50 ]; do
+    FREE_PORT=$((FREE_PORT + 1))
+    tries=$((tries + 1))
+  done
+
+  if [ "$FREE_PORT" != "$DEFAULT_PORT" ]; then
+    echo "Porta $DEFAULT_PORT já está em uso; usando a porta $FREE_PORT."
+    if grep -q '^HOST_PORT=' .env; then
+      sed -i "s/^HOST_PORT=.*/HOST_PORT=$FREE_PORT/" .env
+    else
+      echo "HOST_PORT=$FREE_PORT" >> .env
+    fi
   fi
 fi
 export HOST_PORT="$FREE_PORT"
