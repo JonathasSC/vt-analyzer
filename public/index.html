@@ -106,6 +106,10 @@
 
   <section>
     <div class="shdr"><h2><span class="material-symbols-outlined shdr-icon">leaderboard</span>Ranking de Engines</h2></div>
+    <div class="echart-panel">
+      <div class="echart-caption">Top engines por detecções maliciosas</div>
+      <div class="echart" id="engine-bar-chart"></div>
+    </div>
     <div class="tw">
       <div class="tabs">
         <button class="tab active" onclick="switchTab(this,'tp-det')"><span class="material-symbols-outlined tab-icon">gpp_bad</span>Top Detectores</button>
@@ -136,6 +140,7 @@
 </main>
 
 <div id="toast"></div>
+<div id="ebar-tip" class="ebar-tip"></div>
 
 <script>
 const INITIAL_DATA = [];
