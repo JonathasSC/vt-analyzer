@@ -1,5 +1,5 @@
 {
-  "name": "mirai-dashboard",
+  "name": "argus-dashboard",
   "version": "1.0.0",
   "private": true,
   "description": "Dashboard de análise de detecção de malware com integração à API v3 da VirusTotal",

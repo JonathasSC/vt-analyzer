@@ -1,8 +1,8 @@
 services:
-  mirai-dashboard:
+  argus-dashboard:
     build: .
-    image: mirai-dashboard:latest
-    container_name: mirai-dashboard
+    image: argus-dashboard:latest
+    container_name: argus-dashboard
     ports:
       - "${HOST_PORT:-3000}:3000"
     env_file:

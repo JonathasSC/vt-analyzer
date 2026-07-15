@@ -74,10 +74,10 @@ DEFAULT_PORT="${DEFAULT_PORT:-3000}"
 
 FREE_PORT="$DEFAULT_PORT"
 
-# Se o container mirai-dashboard já existe (rodando ou só parado), o "docker compose up"
+# Se o container argus-dashboard já existe (rodando ou só parado), o "docker compose up"
 # abaixo vai recriá-lo/reiniciá-lo liberando e reocupando a mesma porta — não é conflito real,
 # então pulamos a varredura de porta livre para não incrementar à toa a cada execução.
-EXISTING_CONTAINER="$($DOCKER_CMD ps -a --filter 'name=^/mirai-dashboard$' --format '{{.Names}}' 2>/dev/null)"
+EXISTING_CONTAINER="$($DOCKER_CMD ps -a --filter 'name=^/argus-dashboard$' --format '{{.Names}}' 2>/dev/null)"
 
 if [ -z "$EXISTING_CONTAINER" ]; then
   tries=0
@@ -101,6 +101,6 @@ echo "Construindo a imagem e iniciando o container..."
 $DOCKER_CMD compose up -d --build
 
 echo
-echo "Mirai Dashboard rodando em: http://localhost:$FREE_PORT"
+echo "Argus Dashboard rodando em: http://localhost:$FREE_PORT"
 echo "Ver logs:  $DOCKER_CMD compose logs -f"
 echo "Parar:     ./stop.sh"

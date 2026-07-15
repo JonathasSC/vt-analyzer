@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Para o container do Mirai Dashboard.
+# Para o container do Argus Dashboard.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"

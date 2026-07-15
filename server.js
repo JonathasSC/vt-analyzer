@@ -78,5 +78,5 @@ app.get('/api/vt/analysis/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Mirai Dashboard rodando em http://localhost:${PORT}`);
+  console.log(`Argus Dashboard rodando em http://localhost:${PORT}`);
 });
