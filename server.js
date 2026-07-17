@@ -59,6 +59,23 @@ app.post('/api/vt/scan', upload.single('file'), async (req, res) => {
   }
 });
 
+app.get('/api/vt/report/:hash', async (req, res) => {
+  try {
+    const apiKey = resolveApiKey(req.query.apiKey);
+    if (!apiKey) return res.status(400).json({ error: 'Chave de API da VirusTotal não informada.' });
+
+    const vtResp = await fetch(`${VT_BASE}/files/${encodeURIComponent(req.params.hash)}`, {
+      headers: { 'x-apikey': apiKey },
+    });
+    const vtJson = await vtResp.json();
+    if (!vtResp.ok) return forwardVtError(res, vtResp, vtJson);
+
+    res.json(vtJson);
+  } catch (err) {
+    res.status(502).json({ error: 'Falha ao comunicar com a VirusTotal.', detail: err.message });
+  }
+});
+
 app.get('/api/vt/analysis/:id', async (req, res) => {
   try {
     const apiKey = resolveApiKey(req.query.apiKey);
